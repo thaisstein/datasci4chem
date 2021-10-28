@@ -1,4 +1,3 @@
-//Neo.ClientError.Statement.ExternalResourceFailed
 // loads molecules from moleculenode.csv
 LOAD CSV WITH HEADERS FROM 'https://raw.githubusercontent.com/thaisstein/datasci4chemistry/main/moleculenode.csv' AS line
 CREATE (:Molecule { id_molec: line.id_molec, name: line.name})
@@ -45,22 +44,15 @@ WITH m.smiles AS smiles, COLLECT(m) AS branches
 WHERE SIZE(branches) > 1
 FOREACH (n IN branches | DETACH DELETE n);
 
-//PROJECAO
+//PROJECTION
 
-MATCH(m1:Molecule)-[a]->(r1:Reaction)<-[b]-(m2:Molecule)
+MATCH(m1:Molecule)-[a]->(r1:Reaction)-[b]->(m2:Molecule)
 WHERE m1.id_molec > m2.id_molec
-MERGE (m1)<-[r:Relates]->(m2)
+WITH r1.id_reac AS reac
+MERGE (m1)-[r:Relates{reaction: reac}]->(m2)
 
 MATCH (m1:Molecule)<-[r:Relates]->(m2:Molecule)
 RETURN m1, m2
 LIMIT 50
 
-CALL gds.graph.create (
-    'prGraph',
-    'Page',m
-    'LINKS'
-)
 
-//checando p ver duplos
-
-MATCH (m:Molecule)  WHERE m.name in ["water"] RETURN m
