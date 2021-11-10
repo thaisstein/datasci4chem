@@ -5,6 +5,7 @@ import networkx as nx
 import matplotlib.pyplot as plt
 import csv
 from matplotlib import pyplot as plt
+
 def checkSmiles(smiles):
     if(smiles == " "):
         return 0
@@ -28,14 +29,14 @@ def rowsLog(rows_log, regular, component, id, problematic_reactions):
 
 def rowsMolec(rows_molec, name, id):
     rows_molec.append({"id_molec": id, 
-    "name": name
+    "name": name.lower()
     }) 
 
 
 def rowsReaction(rows_reac, smiles, id_reac, description, solvent, catalyst, problematic_reactions):
     if id_reac not in problematic_reactions:
         rows_reac.append({"id_reac": id_reac, 
-                "smiles":smiles,
+                "smiles": smiles,
                 "description": description, 
                 "solvent": solvent, 
                 "catalyst": catalyst
@@ -47,11 +48,17 @@ def rowsEdge(source, target, role, rows_edge):
     "target": target,
     "role" : role
     })
+    
+def rowsNewEdge(source, target, role, rows_edge):
+    rows_edge.append({"source": source,
+    "target": target,
+    "id_reac" : role
+    })
 
 def csvFile(name, rows, cols):
     csvname = name  
     df = pd.DataFrame(rows, columns=cols)
-    if(name == "moleculenode" or name =="reactionnode"):
+    if(name.lower() == "moleculenode" or name.lower() =="reactionnode"):
         df = df.drop_duplicates()
     df.to_csv(csvname,  index = False, quoting=csv.QUOTE_ALL)
 
@@ -72,6 +79,9 @@ rows_edge_02 = []
 cols_log = ["regular", "reason", "component", "id_reac"]
 rows_log = []
 
+cols_newedges = ["source", "target", "id"]
+rows_newedges = []
+
 l = ['pftaps19760106_wk01.xml' ,'pftaps19760113_wk02.xml' ,'pftaps19760120_wk03.xml', 'pftaps19760127_wk04.xml',
 'pftaps19760203_wk05.xml', 'pftaps19760210_wk06.xml', 'pftaps19760217_wk07.xml', 'pftaps19760224_wk08.xml',
 'pftaps19760302_wk09.xml', 'pftaps19760309_wk10.xml', 'pftaps19760316_wk11.xml', 'pftaps19760323_wk12.xml',
@@ -91,7 +101,7 @@ for k in l:
 
     tree = ET.parse(xmlfile)
     root = tree.getroot() #reactionlist
-    solvent = catalyst = ""
+    solvent = catalyst = " "
 
 
     id_reac = smiles = description = solvent = catalyst = temperature = id_reactants = id_products = name = source = target = role = " "
@@ -137,9 +147,9 @@ for k in l:
                             if(prodinfo.tag == "{http://www.xml-cml.org/schema}molecule"):
                                 for noun in prodinfo:
                                     if (noun.tag == "{http://bitbucket.org/dan2097}nameResolved"): 
-                                        name = noun.text
+                                        name = noun.text.lower()
                                     elif (noun.tag == "{http://www.xml-cml.org/schema}name"):
-                                        name = noun.text
+                                        name = noun.text.lower()
                             if (prodinfo.tag == "{http://www.xml-cml.org/schema}identifier" and prodinfo.attrib["dictRef"] == "cml:smiles"):
                                 id_products = (prodinfo.attrib["value"])   
                                 productlist.append(id_products)
@@ -158,9 +168,9 @@ for k in l:
                             if(reacinfo.tag == "{http://www.xml-cml.org/schema}molecule"):
                                 for noun in reacinfo:
                                     if (noun.tag == "{http://bitbucket.org/dan2097}nameResolved"): 
-                                        name = noun.text
+                                        name = noun.text.lower()
                                     elif (noun.tag == "{http://www.xml-cml.org/schema}name"):
-                                        name = noun.text
+                                        name = noun.text.lower()
                             if(reacinfo.tag == "{http://www.xml-cml.org/schema}identifier" and reacinfo.attrib["dictRef"]=="cml:smiles"):
                                 id_reactants = (reacinfo.attrib["value"]) 
                                 reactantlist.append(id_reactants)
@@ -190,7 +200,7 @@ csvFile("log", rows_log, cols_log)
 # erasing reactions on log
 
 
-with open("log.csv", 'r') as fh:
+with open("log", 'r') as fh:
     total = 0
     irregular = 0
     id_list = []
