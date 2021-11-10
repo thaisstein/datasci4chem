@@ -192,8 +192,8 @@ for k in l:
                 rowsEdge(reactantlist[i], id_reac, "reactant", rows_edge_02)  
 csvFile("moleculenode", rows_molec, cols_molec)
 csvFile("reactionnode", rows_reac, cols_reac)
-csvFile("edges_reaction_product", rows_edge_01, cols_edge_01)
-csvFile("edges_reactant_reaction", rows_edge_02, cols_edge_02)
+csvFile("edges_reactant_reaction", rows_edge_01, cols_edge_01)
+csvFile("edges_reaction_product", rows_edge_02, cols_edge_02)
 csvFile("log", rows_log, cols_log)
 
 
